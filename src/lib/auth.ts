@@ -9,6 +9,63 @@ import Google from "next-auth/providers/google"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     ...authConfig,
+    callbacks: {
+        ...authConfig.callbacks,
+        async signIn({ user, account }) {
+            if (account?.provider === "google") {
+                try {
+                    const { email, name, image, id } = user;
+                    if (!email) return false;
+
+                    await connectDB();
+                    const existingUser = await User.findOne({ email });
+
+                    if (!existingUser) {
+                        await User.create({
+                            name: name,
+                            email: email,
+                            // image, // Schema doesn't have image field yet, maybe add it later?
+                            provider: "google",
+                            // Ensure other required fields are handled or optional
+                        });
+                    }
+                    return true;
+                } catch (error) {
+                    console.log("Error checking if user exists: ", error);
+                    return false;
+                }
+            }
+            return true;
+        },
+        async jwt({ token, user, trigger, session, account }) {
+            if (user) {
+                // When signing in, user object is available.
+                // We need to fetch the MongoDB _id if it's not already set correctly.
+                try {
+                    await connectDB();
+                    const dbUser = await User.findOne({ email: user.email });
+                    if (dbUser) {
+                        token.id = dbUser._id.toString();
+                        token.theme = dbUser.theme;
+                        token.name = dbUser.name;
+                        token.provider = dbUser.provider || (account?.provider === 'google' ? 'google' : 'credentials');
+                    } else {
+                        // Fallback if user creation failed or race condition (shouldn't happen with signIn callback)
+                        token.id = user.id;
+                        token.provider = account?.provider;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user in JWT callback:", error);
+                    token.id = user.id;
+                }
+            }
+            if (trigger === "update" && session) {
+                token.name = session.user.name;
+                token.theme = session.user.theme;
+            }
+            return token;
+        },
+    },
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,

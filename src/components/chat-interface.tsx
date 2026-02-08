@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { logout } from "@/actions/auth";
 import { deleteLastMessage } from "@/actions/chat";
 import ProfileSettings from "./profile-settings";
+import { toast } from "sonner";
 
 interface Message {
     id: string;
@@ -27,6 +28,7 @@ interface ChatInterfaceProps {
         email?: string | null;
         image?: string | null;
         theme?: string | null;
+        provider?: string | null;
     };
 }
 
@@ -153,11 +155,12 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                     role: 'assistant',
                     content: response.data.message || "File processed. You can now ask questions."
                 }]);
+                toast.success("File uploaded successfully");
             }
         } catch (error: any) {
             console.error("Upload failed", error);
             const errorMsg = error.response?.data?.error || "Failed to upload file. Please try again.";
-            alert(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setUploading(false);
         }
@@ -174,14 +177,14 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                     setShowCamera(false);
                 });
         }
-    }, [webcamRef]);
+    }, [webcamRef, handleFileUpload]);
 
     const sendMessage = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!input.trim() || loading) return;
 
         if (!chatId && !fileId) {
-            alert("Please upload a file to start chatting.");
+            toast.error("Please upload a file to start chatting.");
             return;
         }
 
@@ -491,9 +494,14 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                     </div>
 
                                     {msg.role === 'user' && (user?.image ? (
-                                        <img src={user.image} alt="User" className="w-8 h-8 rounded-full mt-1" />
+                                        <img
+                                            src={user.image}
+                                            alt="User"
+                                            className="w-8 h-8 rounded-full mt-1 object-cover"
+                                            referrerPolicy="no-referrer"
+                                        />
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex flex-shrink-0 items-center justify-center text-gray-600 dark:text-gray-300 text-xs mt-1 font-bold">
+                                        <div className={`w-8 h-8 rounded-full ${themeColor} flex flex-shrink-0 items-center justify-center text-white text-xs mt-1 font-bold shadow-sm`}>
                                             {user?.name?.[0] || 'U'}
                                         </div>
                                     ))}

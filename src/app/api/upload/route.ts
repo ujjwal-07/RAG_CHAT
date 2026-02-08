@@ -128,8 +128,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: "Completed you can ask your questions now", fileId: fileRecord._id });
 
     } catch (error: any) {
-        log(`FATAL Upload error: ${error.message}\nStack: ${error.stack}`);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        log(`FATAL Upload error: ${errorMessage}\nStack: ${error.stack}`);
         console.error("Upload error details:", error);
-        return NextResponse.json({ error: "Failed to process file" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to process file: " + errorMessage }, { status: 500 });
     }
 }

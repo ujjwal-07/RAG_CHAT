@@ -26,7 +26,7 @@ export const authConfig = {
             }
             return true
         },
-        async jwt({ token, user, trigger, session }) {
+        async jwt({ token, user, trigger, session }: { token: any; user?: any; trigger?: string; session?: any }) {
             if (user) {
                 token.id = user.id;
                 token.theme = user.theme;
@@ -38,15 +38,18 @@ export const authConfig = {
             }
             return token
         },
-        async session({ session, token }) {
+        async session({ session, token }: { session: any, token: any }) {
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.theme = token.theme as string;
                 session.user.name = token.name as string;
+                // @ts-ignore
+                session.user.provider = token.provider as string;
             }
             return session
         },
     },
+
     providers: [], // Providers added in auth.ts
     session: {
         strategy: "jwt",

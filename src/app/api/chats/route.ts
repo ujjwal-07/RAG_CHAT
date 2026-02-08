@@ -12,6 +12,14 @@ export async function GET(req: NextRequest) {
     try {
         await connectDB();
 
+        // Validate Session ID format (simple check)
+        if (!session.user.id.match(/^[0-9a-fA-F]{24}$/)) {
+            // If ID is not a valid ObjectId (e.g. it's a UUID from Google), return empty or handle it.
+            // This happens if the user session hasn't updated yet.
+            console.warn(`Invalid MongoDB ObjectId for user: ${session.user.id}. Likely stale session.`);
+            return NextResponse.json([]);
+        }
+
         // Fetch chats for the user, sorted by newest first
         const chats = await Chat.find({ userId: session.user.id })
             .sort({ createdAt: -1 })

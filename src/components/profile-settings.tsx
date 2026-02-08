@@ -10,6 +10,7 @@ interface ProfileSettingsProps {
         email?: string | null;
         image?: string | null;
         theme?: string | null;
+        provider?: string | null;
     };
     onClose: () => void;
 }
@@ -132,23 +133,27 @@ export default function ProfileSettings({ user, onClose }: ProfileSettingsProps)
                             </div>
                         </div>
 
-                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <label className="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Change Password</label>
-                            <div className="space-y-3">
-                                <input
-                                    name="currentPassword"
-                                    type="password"
-                                    placeholder="Current Password (Required)"
-                                    className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition text-sm"
-                                />
-                                <input
-                                    name="newPassword"
-                                    type="password"
-                                    placeholder="New Password"
-                                    className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition text-sm"
-                                />
+
+
+                        {user.provider === 'credentials' && (
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                                <label className="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Change Password</label>
+                                <div className="space-y-3">
+                                    <input
+                                        name="currentPassword"
+                                        type="password"
+                                        placeholder="Current Password (Required)"
+                                        className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition text-sm"
+                                    />
+                                    <input
+                                        name="newPassword"
+                                        type="password"
+                                        placeholder="New Password"
+                                        className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition text-sm"
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {message && (
                             <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${message.includes("success") ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>

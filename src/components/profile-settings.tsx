@@ -61,7 +61,7 @@ export default function ProfileSettings({ user, onClose }: ProfileSettingsProps)
                         <Settings size={20} className="text-indigo-500" />
                         Settings
                     </h2>
-                    <button onClick={onClose} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition">
+                    <button onClick={onClose} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition cursor-pointer">
                         <X size={20} />
                     </button>
                 </div>
@@ -97,14 +97,14 @@ export default function ProfileSettings({ user, onClose }: ProfileSettingsProps)
                                     <button
                                         type="button"
                                         onClick={() => setTheme('light')}
-                                        className={`p-1.5 rounded-md transition ${theme === 'light' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
+                                        className={`p-1.5 rounded-md transition cursor-pointer ${theme === 'light' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
                                     >
                                         <Sun size={16} />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setTheme('dark')}
-                                        className={`p-1.5 rounded-md transition ${theme === 'dark' ? 'bg-gray-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
+                                        className={`p-1.5 rounded-md transition cursor-pointer ${theme === 'dark' ? 'bg-gray-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
                                     >
                                         <Moon size={16} />
                                     </button>
@@ -165,7 +165,7 @@ export default function ProfileSettings({ user, onClose }: ProfileSettingsProps)
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 font-medium shadow-md hover:shadow-lg mt-2"
+                            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 font-medium shadow-md hover:shadow-lg mt-2 cursor-pointer"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={18} />}
                             Save Changes

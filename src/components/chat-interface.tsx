@@ -294,10 +294,10 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                             <Sparkles size={18} />
                         </div>
                         <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-                            Antigravity
+                            RAG Chatbot
                         </h2>
                     </div>
-                    <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
                         <X size={20} />
                     </button>
                 </div>
@@ -308,7 +308,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                         setFileId(null);
                         setMessages([]);
                         setIsSidebarOpen(false);
-                    }} className="flex items-center justify-center w-full gap-2 px-4 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all duration-200 font-medium">
+                    }} className="flex items-center justify-center w-full gap-2 px-4 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all duration-200 font-medium cursor-pointer">
                         <Plus size={18} /> New Chat
                     </Link>
                 </div>
@@ -359,8 +359,8 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                                                 if (e.key === 'Escape') setEditingChatId(null);
                                                             }}
                                                         />
-                                                        <button onClick={() => saveTitle(chat._id)} className="text-green-600 hover:text-green-500 p-1"><Check size={14} /></button>
-                                                        <button onClick={() => setEditingChatId(null)} className="text-gray-400 hover:text-gray-500 p-1"><X size={14} /></button>
+                                                        <button onClick={() => saveTitle(chat._id)} className="text-green-600 hover:text-green-500 p-1 cursor-pointer"><Check size={14} /></button>
+                                                        <button onClick={() => setEditingChatId(null)} className="text-gray-400 hover:text-gray-500 p-1 cursor-pointer"><X size={14} /></button>
                                                     </div>
                                                 ) : (
                                                     <Link
@@ -385,14 +385,14 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                                         )}>
                                                             <button
                                                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(chat); }}
-                                                                className="p-1 text-gray-400 hover:text-indigo-500 transition-colors rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                                className="p-1 text-gray-400 hover:text-indigo-500 transition-colors rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
                                                                 title="Rename"
                                                             >
                                                                 <Pencil size={12} />
                                                             </button>
                                                             <button
                                                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteChat(chat._id); }}
-                                                                className="p-1 text-gray-400 hover:text-red-500 transition-colors rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                                className="p-1 text-gray-400 hover:text-red-500 transition-colors rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
                                                                 title="Delete"
                                                             >
                                                                 <Trash2 size={12} />
@@ -425,7 +425,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                 {/* Header */}
                 <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center h-16 sticky top-0 z-10">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer">
                             <Menu size={20} />
                         </button>
                         <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100 hidden sm:block">
@@ -440,13 +440,13 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">{user.name}</span>
                                 <button
                                     onClick={() => setShowProfileSettings(true)}
-                                    className={`w-9 h-9 rounded-full ${themeColor} flex items-center justify-center text-white font-bold shadow-md hover:ring-2 hover:ring-offset-2 hover:ring-indigo-500 transition-all`}
+                                    className={`w-9 h-9 rounded-full ${themeColor} flex items-center justify-center text-white font-bold shadow-md hover:ring-2 hover:ring-offset-2 hover:ring-indigo-500 transition-all cursor-pointer`}
                                 >
                                     {user.name?.[0]?.toUpperCase() || "U"}
                                 </button>
                                 <button
                                     onClick={handleLogout}
-                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition"
+                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition cursor-pointer"
                                     title="Log out"
                                 >
                                     <LogOut size={18} />
@@ -506,7 +506,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
 
                             <button
                                 onClick={() => setShowCamera(true)}
-                                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition transform hover:-translate-y-0.5"
+                                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition transform hover:-translate-y-0.5 cursor-pointer"
                             >
                                 <Camera className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                 <span className="font-medium text-gray-700 dark:text-gray-200">Open Camera</span>
@@ -540,8 +540,8 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                                         autoFocus
                                                     />
                                                     <div className="flex gap-2 justify-end mt-3">
-                                                        <button onClick={() => setEditingMessageId(null)} className="px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 dark:bg-gray-700 rounded-md transition-colors">Cancel</button>
-                                                        <button onClick={submitEdit} className="px-3 py-1 text-xs font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">Save & Ask</button>
+                                                        <button onClick={() => setEditingMessageId(null)} className="px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 dark:bg-gray-700 rounded-md transition-colors cursor-pointer">Cancel</button>
+                                                        <button onClick={submitEdit} className="px-3 py-1 text-xs font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors cursor-pointer">Save & Ask</button>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -558,7 +558,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                                         <div className="flex justify-end mt-2 pt-2 border-t border-gray-100/50 dark:border-gray-700/30">
                                                             <button
                                                                 onClick={() => copyToClipboard(msg.content, msg.id)}
-                                                                className="flex items-center gap-1.5 text-[10px] font-medium text-gray-400 hover:text-indigo-500 transition-colors"
+                                                                className="flex items-center gap-1.5 text-[10px] font-medium text-gray-400 hover:text-indigo-500 transition-colors cursor-pointer"
                                                                 title="Copy to clipboard"
                                                             >
                                                                 {copiedMessageId === msg.id ? (
@@ -579,7 +579,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                             {msg.role === 'user' && msg.id === lastUserMessageId && !editingMessageId && (
                                                 <button
                                                     onClick={() => handleEditMessage(msg)}
-                                                    className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 transition-all hover:scale-110"
+                                                    className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 transition-all hover:scale-110 cursor-pointer"
                                                     title="Edit message"
                                                 >
                                                     <Pencil size={14} />
@@ -629,7 +629,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                 >
                                     <button
                                         onClick={resetForUpload}
-                                        className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded-full text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-900/30 transition shadow-sm"
+                                        className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded-full text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-900/30 transition shadow-sm cursor-pointer"
                                     >
                                         <UploadCloud size={16} />
                                         Context missing? Upload a different file
@@ -650,14 +650,13 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                                 <button
                                     type="submit"
                                     disabled={loading || !input.trim()}
-                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200`}
+                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 cursor-pointer`}
                                 >
                                     <Send size={18} />
                                 </button>
                             </div>
                         </form>
                         <p className="text-center text-[10px] text-gray-400 mt-3 font-medium uppercase tracking-widest">
-                            Powered by RAG Intelligence
                         </p>
                     </div>
                 )}
@@ -668,7 +667,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
             {showCamera && (
                 <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl max-w-md w-full relative border border-gray-200 dark:border-gray-700">
-                        <button onClick={() => setShowCamera(false)} className="absolute top-4 right-4 z-10 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-sm transition">
+                        <button onClick={() => setShowCamera(false)} className="absolute top-4 right-4 z-10 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-sm transition cursor-pointer">
                             <X size={20} />
                         </button>
                         <div className="aspect-[4/3] bg-black relative">
@@ -680,7 +679,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                             />
                         </div>
                         <div className="p-6 flex justify-center bg-gray-900">
-                            <button onClick={captureCamera} className="w-16 h-16 rounded-full border-4 border-white bg-red-600 hover:bg-red-700 shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95">
+                            <button onClick={captureCamera} className="w-16 h-16 rounded-full border-4 border-white bg-red-600 hover:bg-red-700 shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer">
                                 <Camera className="w-8 h-8 text-white" />
                             </button>
                         </div>

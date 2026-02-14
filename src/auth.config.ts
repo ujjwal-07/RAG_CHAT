@@ -7,7 +7,7 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user
-            const isAuthPage = nextUrl.pathname === "/login" || nextUrl.pathname === "/register"
+            const isAuthPage = nextUrl.pathname === "/login"
 
             // Allow auth pages
             if (isAuthPage) {

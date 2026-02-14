@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Send, Paperclip, Camera, Plus, MessageSquare, Menu, X, Loader2, UploadCloud, Image as ImageIcon, FileText, Pencil, Trash2, Check, User, LogOut, Settings, Copy } from "lucide-react";
+import { Send, Camera, Plus, MessageSquare, Menu, X, Loader2, UploadCloud, Pencil, Trash2, Check, LogOut, Copy, Sparkles } from "lucide-react";
 import ReactWebcam from "react-webcam";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -50,6 +51,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
     const [uploading, setUploading] = useState(false);
     const [showProfileSettings, setShowProfileSettings] = useState(false);
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+    const [showReuploadOption, setShowReuploadOption] = useState(false);
 
     // Refs & Router
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -179,6 +181,14 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
         }
     }, [webcamRef, handleFileUpload]);
 
+    const resetForUpload = () => {
+        setChatId(null);
+        setFileId(null);
+        setMessages([]);
+        setShowReuploadOption(false);
+        router.push("/");
+    };
+
     const sendMessage = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!input.trim() || loading) return;
@@ -190,6 +200,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
 
         const userMessage = input;
         setInput("");
+        setShowReuploadOption(false);
 
         const tempId = Date.now().toString();
         setMessages(prev => [...prev, { id: tempId, role: 'user', content: userMessage }]);
@@ -208,6 +219,11 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
             }
 
             setMessages(prev => [...prev, { id: Date.now().toString() + '-a', role: 'assistant', content: response.data.message }]);
+
+            if (response.data.contextFound === false) {
+                setShowReuploadOption(true);
+            }
+
         } catch (error) {
             console.error("Chat error", error);
             setMessages(prev => [...prev, { id: Date.now().toString() + '-e', role: 'assistant', content: "Something went wrong. Please try again." }]);
@@ -233,6 +249,7 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
         setMessages(updatedMessages);
         setEditingMessageId(null);
 
+        setShowReuploadOption(false);
         setLoading(true);
         try {
             const response = await axios.post("/api/chat", {
@@ -243,6 +260,11 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
 
             // Add the new assistant response
             setMessages(prev => [...prev, { id: Date.now().toString() + '-a', role: 'assistant', content: response.data.message }]);
+
+            if (response.data.contextFound === false) {
+                setShowReuploadOption(true);
+            }
+
         } catch (error) {
             setMessages(prev => [...prev, { id: Date.now().toString() + '-e', role: 'assistant', content: "Failed to get a new response." }]);
         } finally {
@@ -263,12 +285,19 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
         <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden font-sans">
             {/* Sidebar */}
             <div className={cn(
-                "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col",
+                "fixed inset-y-0 left-0 z-50 w-72 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col shadow-2xl md:shadow-none",
                 isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             )}>
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
-                    <h2 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600`}>RAG Chat</h2>
-                    <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                <div className="p-6 border-b border-gray-200/50 dark:border-gray-800/50 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+                            <Sparkles size={18} />
+                        </div>
+                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+                            Antigravity
+                        </h2>
+                    </div>
+                    <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                         <X size={20} />
                     </button>
                 </div>
@@ -279,58 +308,115 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                         setFileId(null);
                         setMessages([]);
                         setIsSidebarOpen(false);
-                    }} className={`flex items-center justify-center w-full gap-2 px-4 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 ${themeColor}`}>
+                    }} className="flex items-center justify-center w-full gap-2 px-4 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all duration-200 font-medium">
                         <Plus size={18} /> New Chat
                     </Link>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider pl-2">Recent Chats</p>
-                    <div className="space-y-1">
-                        {chatHistory.length === 0 ? (
-                            <div className="text-sm text-gray-500 italic pl-2">No recent chats</div>
-                        ) : (
-                            chatHistory.map(chat => (
-                                <div key={chat._id} className="group flex items-center gap-1">
-                                    {editingChatId === chat._id ? (
-                                        <div className="flex-1 flex items-center gap-1 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg animate-in fade-in">
-                                            <input
-                                                value={editTitle}
-                                                onChange={(e) => setEditTitle(e.target.value)}
-                                                className="flex-1 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded px-2 py-1 outline-none"
-                                                autoFocus
-                                            />
-                                            <button onClick={() => saveTitle(chat._id)} className="text-green-600 hover:text-green-700 p-1"><Check size={14} /></button>
-                                            <button onClick={() => setEditingChatId(null)} className="text-red-500 hover:text-red-600 p-1"><X size={14} /></button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Link
-                                                href={`/chat/${chat._id}`}
-                                                className={cn(
-                                                    "flex-1 block p-3 rounded-xl text-sm truncate transition-all duration-200",
-                                                    chatId === chat._id
-                                                        ? `${themeColor.replace('bg-', 'bg-opacity-10 text-')} font-medium bg-opacity-10`
-                                                        : "hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {(() => {
+                        const today = new Date();
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+
+                        const groups: Record<string, any[]> = {
+                            "Today": [],
+                            "Yesterday": [],
+                            "Previous 7 Days": [],
+                            "Older": []
+                        };
+
+                        chatHistory.forEach(chat => {
+                            const chatDate = new Date(chat.createdAt || Date.now());
+                            if (chatDate.toDateString() === today.toDateString()) {
+                                groups["Today"].push(chat);
+                            } else if (chatDate.toDateString() === yesterday.toDateString()) {
+                                groups["Yesterday"].push(chat);
+                            } else if (chatDate > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) {
+                                groups["Previous 7 Days"].push(chat);
+                            } else {
+                                groups["Older"].push(chat);
+                            }
+                        });
+
+                        return Object.entries(groups).map(([label, chats]) => {
+                            if (chats.length === 0) return null;
+                            return (
+                                <div key={label} className="space-y-2">
+                                    <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider pl-3 mb-2">{label}</h3>
+                                    <div className="space-y-1">
+                                        {chats.map(chat => (
+                                            <div key={chat._id} className="group relative">
+                                                {editingChatId === chat._id ? (
+                                                    <div className="flex items-center gap-1 p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 animate-in fade-in">
+                                                        <input
+                                                            value={editTitle}
+                                                            onChange={(e) => setEditTitle(e.target.value)}
+                                                            className="flex-1 text-sm bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 min-w-0"
+                                                            autoFocus
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') saveTitle(chat._id);
+                                                                if (e.key === 'Escape') setEditingChatId(null);
+                                                            }}
+                                                        />
+                                                        <button onClick={() => saveTitle(chat._id)} className="text-green-600 hover:text-green-500 p-1"><Check size={14} /></button>
+                                                        <button onClick={() => setEditingChatId(null)} className="text-gray-400 hover:text-gray-500 p-1"><X size={14} /></button>
+                                                    </div>
+                                                ) : (
+                                                    <Link
+                                                        href={`/chat/${chat._id}`}
+                                                        className={cn(
+                                                            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 group-hover:bg-gray-100 dark:group-hover:bg-gray-800/50",
+                                                            chatId === chat._id
+                                                                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-medium shadow-sm"
+                                                                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                                        )}
+                                                    >
+                                                        <MessageSquare size={16} className={cn(
+                                                            "flex-shrink-0 transition-colors",
+                                                            chatId === chat._id ? "text-indigo-500" : "text-gray-400 group-hover:text-gray-500"
+                                                        )} />
+                                                        <span className="truncate flex-1">{chat.title || "Untitled Conversation"}</span>
+
+                                                        {/* Hover Actions */}
+                                                        <div className={cn(
+                                                            "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
+                                                            chatId === chat._id && "opacity-100" // Always show actions for active chat on hover
+                                                        )}>
+                                                            <button
+                                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(chat); }}
+                                                                className="p-1 text-gray-400 hover:text-indigo-500 transition-colors rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                                title="Rename"
+                                                            >
+                                                                <Pencil size={12} />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteChat(chat._id); }}
+                                                                className="p-1 text-gray-400 hover:text-red-500 transition-colors rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 size={12} />
+                                                            </button>
+                                                        </div>
+                                                    </Link>
                                                 )}
-                                                style={chatId === chat._id ? { color: 'var(--theme-color)', backgroundColor: 'var(--theme-bg)' } : {}}
-                                            >
-                                                {chat.title || "Untitled Chat"}
-                                            </Link>
-                                            <div className="hidden group-hover:flex items-center gap-1 pr-1">
-                                                <button onClick={(e) => { e.preventDefault(); startEditing(chat); }} className="p-1.5 text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition">
-                                                    <Pencil size={14} />
-                                                </button>
-                                                <button onClick={(e) => { e.preventDefault(); deleteChat(chat._id); }} className="p-1.5 text-gray-400 hover:text-red-500 transition">
-                                                    <Trash2 size={14} />
-                                                </button>
                                             </div>
-                                        </>
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
-                            ))
-                        )}
-                    </div>
+                            );
+                        });
+                    })()}
+
+                    {chatHistory.length === 0 && (
+                        <div className="text-center py-10">
+                            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
+                                <MessageSquare className="text-gray-400" size={20} />
+                            </div>
+                            <p className="text-sm text-gray-500 font-medium">No chats yet</p>
+                            <p className="text-xs text-gray-400 mt-1">Start a new conversation</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -388,24 +474,26 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                             </div>
 
                             <div {...getRootProps()} className={cn(
-                                "w-full p-12 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 gap-4 group",
-                                isDragActive ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 scale-105" : "border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
+                                "w-full p-12 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 gap-6 group relative overflow-hidden",
+                                isDragActive ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20 scale-102" : "border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
                             )}>
                                 <input {...getInputProps()} />
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
                                 {uploading ? (
-                                    <Loader2 className={`w-12 h-12 ${themeColor.replace('bg-', 'text-')} animate-spin`} />
+                                    <Loader2 className="w-16 h-16 text-indigo-600 animate-spin" />
                                 ) : (
-                                    <div className="flex flex-col items-center gap-3 group-hover:scale-105 transition-transform">
-                                        <div className={`p-5 ${themeColor.replace('bg-', 'bg-opacity-10 text-')} bg-opacity-10 rounded-full`}>
-                                            <UploadCloud className={`w-8 h-8 ${themeColor.replace('bg-', 'text-')}`} />
+                                    <div className="flex flex-col items-center gap-4 z-10 group-hover:scale-105 transition-transform duration-300">
+                                        <div className="p-6 bg-white dark:bg-gray-800 rounded-full shadow-xl shadow-indigo-100 dark:shadow-none mb-2 group-hover:shadow-2xl transition-shadow">
+                                            <UploadCloud className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
                                         </div>
-                                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                                        <p className="text-xl font-semibold text-gray-700 dark:text-gray-200">
                                             Click to upload or drag & drop
                                         </p>
-                                        <div className="flex gap-2 text-xs text-gray-400 uppercase tracking-wide">
-                                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">PDF</span>
-                                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">DOCX</span>
-                                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">IMG</span>
+                                        <div className="flex gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">PDF</span>
+                                            <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">DOCX</span>
+                                            <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">IMG</span>
                                         </div>
                                     </div>
                                 )}
@@ -426,87 +514,94 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
                         </div>
                     ) : (
                         <div className="space-y-6 max-w-3xl mx-auto pb-6">
-                            {messages.map((msg, index) => (
-                                <div key={msg.id || index} className={cn("flex gap-4 group", msg.role === 'user' ? "justify-end" : "justify-start")}>
-                                    {msg.role === 'assistant' && (
-                                        <div className={`w-8 h-8 rounded-full ${themeColor} flex flex-shrink-0 items-center justify-center text-white text-xs mt-1 shadow-md`}>
-                                            AI
-                                        </div>
-                                    )}
-
-                                    <div className="max-w-[85%] relative">
-                                        {msg.role === 'user' && editingMessageId === msg.id ? (
-                                            <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-lg border border-indigo-200 dark:border-indigo-900 animate-in zoom-in-95">
-                                                <input
-                                                    value={editMessageContent}
-                                                    onChange={e => setEditMessageContent(e.target.value)}
-                                                    className="w-full text-wrap  bg-transparent border-none outline-none text-gray-800 dark:text-white"
-                                                    autoFocus
-                                                />
-                                                <div className="flex gap-2 justify-end mt-2">
-                                                    <button onClick={() => setEditingMessageId(null)} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
-                                                    <button onClick={submitEdit} className={`text-xs ${themeColor} text-white px-2 py-1 rounded`}>Save & Ask</button>
-                                                </div>
+                            <AnimatePresence initial={false}>
+                                {messages.map((msg, index) => (
+                                    <motion.div
+                                        key={msg.id || index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        className={cn("flex gap-4 group mb-6", msg.role === 'user' ? "justify-end" : "justify-start")}
+                                    >
+                                        {msg.role === 'assistant' && (
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex flex-shrink-0 items-center justify-center text-white shadow-lg">
+                                                <Sparkles size={20} />
                                             </div>
-                                        ) : (
-                                            <div className={cn(
-                                                "rounded-2xl p-4 shadow-sm text-sm leading-relaxed",
-                                                msg.role === 'user'
-                                                    ? `${themeColor} text-white rounded-br-none`
-                                                    : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none"
-                                            )}>
-                                                <p className="whitespace-pre-wrap">{msg.content}</p>
+                                        )}
 
-                                                {/* Selective Copy Button */}
-                                                {msg.role === 'assistant' && !msg.content.includes("supposed to answer based on the context") && (
-                                                    <div className="flex justify-end mt-2 pt-2 border-t border-gray-100 dark:border-gray-700/50">
-                                                        <button
-                                                            onClick={() => copyToClipboard(msg.content, msg.id)}
-                                                            className="flex items-center gap-1.5 text-[10px] font-medium text-gray-400 hover:text-indigo-500 transition-colors"
-                                                            title="Copy to clipboard"
-                                                        >
-                                                            {copiedMessageId === msg.id ? (
-                                                                <>
-                                                                    <Check size={12} className="text-green-500" />
-                                                                    <span className="text-green-500">Copied!</span>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Copy size={12} />
-                                                                </>
-                                                            )}
-                                                        </button>
+                                        <div className="max-w-[85%] relative">
+                                            {msg.role === 'user' && editingMessageId === msg.id ? (
+                                                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-indigo-100 dark:border-indigo-900/50">
+                                                    <input
+                                                        value={editMessageContent}
+                                                        onChange={e => setEditMessageContent(e.target.value)}
+                                                        className="w-full bg-transparent border-none outline-none text-gray-800 dark:text-white font-medium"
+                                                        autoFocus
+                                                    />
+                                                    <div className="flex gap-2 justify-end mt-3">
+                                                        <button onClick={() => setEditingMessageId(null)} className="px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 dark:bg-gray-700 rounded-md transition-colors">Cancel</button>
+                                                        <button onClick={submitEdit} className="px-3 py-1 text-xs font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">Save & Ask</button>
                                                     </div>
-                                                )}
-                                            </div>
-                                        )}
+                                                </div>
+                                            ) : (
+                                                <div className={cn(
+                                                    "rounded-2xl p-5 shadow-sm text-sm leading-relaxed",
+                                                    msg.role === 'user'
+                                                        ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-br-none shadow-indigo-200 dark:shadow-none"
+                                                        : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 text-gray-800 dark:text-gray-100 rounded-bl-none shadow-lg dark:shadow-none"
+                                                )}>
+                                                    <p className="whitespace-pre-wrap text-[15px]">{msg.content}</p>
 
-                                        {/* Edit Button for Last User Message */}
-                                        {msg.role === 'user' && msg.id === lastUserMessageId && !editingMessageId && (
-                                            <button
-                                                onClick={() => handleEditMessage(msg)}
-                                                className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700 transition-all custom-edit-btn"
-                                                title="Edit message"
-                                            >
-                                                <Pencil size={12} />
-                                            </button>
-                                        )}
-                                    </div>
+                                                    {/* Selective Copy Button */}
+                                                    {msg.role === 'assistant' && !msg.content.includes("supposed to answer based on the context") && (
+                                                        <div className="flex justify-end mt-2 pt-2 border-t border-gray-100/50 dark:border-gray-700/30">
+                                                            <button
+                                                                onClick={() => copyToClipboard(msg.content, msg.id)}
+                                                                className="flex items-center gap-1.5 text-[10px] font-medium text-gray-400 hover:text-indigo-500 transition-colors"
+                                                                title="Copy to clipboard"
+                                                            >
+                                                                {copiedMessageId === msg.id ? (
+                                                                    <>
+                                                                        <Check size={12} className="text-green-500" />
+                                                                        <span className="text-green-500">Copied!</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <Copy size={12} />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
 
-                                    {msg.role === 'user' && (user?.image ? (
-                                        <img
-                                            src={user.image}
-                                            alt="User"
-                                            className="w-8 h-8 rounded-full mt-1 object-cover"
-                                            referrerPolicy="no-referrer"
-                                        />
-                                    ) : (
-                                        <div className={`w-8 h-8 rounded-full ${themeColor} flex flex-shrink-0 items-center justify-center text-white text-xs mt-1 font-bold shadow-sm`}>
-                                            {user?.name?.[0] || 'U'}
+                                            {/* Edit Button for Last User Message */}
+                                            {msg.role === 'user' && msg.id === lastUserMessageId && !editingMessageId && (
+                                                <button
+                                                    onClick={() => handleEditMessage(msg)}
+                                                    className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 transition-all hover:scale-110"
+                                                    title="Edit message"
+                                                >
+                                                    <Pencil size={14} />
+                                                </button>
+                                            )}
                                         </div>
-                                    ))}
-                                </div>
-                            ))}
+
+                                        {msg.role === 'user' && (user?.image ? (
+                                            <img
+                                                src={user.image}
+                                                alt="User"
+                                                className="w-10 h-10 rounded-xl mt-1 object-cover shadow-sm ring-2 ring-white dark:ring-gray-800"
+                                                referrerPolicy="no-referrer"
+                                            />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 flex flex-shrink-0 items-center justify-center text-white text-sm font-bold shadow-lg">
+                                                {user?.name?.[0] || 'U'}
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                             {loading && (
                                 <div className="flex justify-start gap-4 animate-pulse">
                                     <div className={`w-8 h-8 rounded-full ${themeColor} flex items-center justify-center text-white text-xs mt-1 opacity-70`}>AI</div>
@@ -523,26 +618,47 @@ export default function ChatInterface({ initialChatId, initialMessages = [], use
 
                 {/* Input Area (Only visible in Chat Mode) */}
                 {!showUploadScreen && (
-                    <div className="p-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700">
-                        <form onSubmit={sendMessage} className="max-w-3xl mx-auto flex gap-3 relative">
-                            <div className="flex-1 relative">
+                    <div className="p-6 bg-transparent">
+                        <AnimatePresence>
+                            {showReuploadOption && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="flex justify-center mb-4"
+                                >
+                                    <button
+                                        onClick={resetForUpload}
+                                        className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded-full text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-900/30 transition shadow-sm"
+                                    >
+                                        <UploadCloud size={16} />
+                                        Context missing? Upload a different file
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-3 relative">
+                            <div className="flex-1 relative group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full opacity-30 group-hover:opacity-75 blur transition duration-500" />
                                 <input
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder="Ask a follow-up question..."
-                                    className="w-full p-4 pr-12 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white shadow-sm transition-shadow hover:shadow-md focus:shadow-lg"
+                                    className="relative w-full py-4 pl-6 pr-14 rounded-full border-none bg-white dark:bg-gray-800 focus:ring-0 text-gray-800 dark:text-white shadow-2xl placeholder-gray-400"
                                 />
                                 <button
                                     type="submit"
                                     disabled={loading || !input.trim()}
-                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 ${themeColor} text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition transform active:scale-95`}
+                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200`}
                                 >
                                     <Send size={18} />
                                 </button>
                             </div>
                         </form>
-                        <p className="text-center text-xs text-gray-400 mt-2">AI can make mistakes. Verify important information.</p>
+                        <p className="text-center text-[10px] text-gray-400 mt-3 font-medium uppercase tracking-widest">
+                            Powered by RAG Intelligence
+                        </p>
                     </div>
                 )}
 

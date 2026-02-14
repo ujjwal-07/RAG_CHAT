@@ -9,6 +9,8 @@ const UserSchema = new Schema({
   otpExpires: { type: Date },
   provider: { type: String, default: 'credentials' }, // 'credentials', 'google', 'phone'
   theme: { type: String, default: 'indigo' }, // 'indigo', 'emerald', 'rose', 'amber', 'cyan'
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
   createdAt: { type: Date, default: Date.now },
 });
 
